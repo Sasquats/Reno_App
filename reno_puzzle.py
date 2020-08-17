@@ -14,6 +14,11 @@ class Puzzle(object):
 		self.start_cell = None
 		self.end_cell = None
 
+	def in_bounds(self, coords):
+		if coords[0] < 0 or coords[1] < 0 or coords[0] > self.b_size or coords[1] > self.b_size:
+			return False
+		return True
+
 	def add_cell(self, position):
 		"""
 		Take a position tuple and create a new cell object with that point
@@ -33,15 +38,27 @@ class Puzzle(object):
 		"""
 		Take last created position tuple and find next not used adjacent position
 		"""
+		adj_cells = []
 		new_point = prev_point
 		prev_x = prev_point[0]
 		prev_y = prev_point[1]
 
+		n_cell = (prev_x + 1, prev_y)
+		s_cell = (prev_x - 1, prev_y)
+		e_cell = (prev_x, prev_y + 1)
+		w_cell = (prev_x, prev_y - 1)
+		if self.in_bounds(n_cell):
+			adj_cells.append(n_cell)
+		if self.in_bounds(s_cell):
+			adj_cells.append(s_cell)
+		if self.in_bounds(e_cell):
+			adj_cells.append(e_cell)
+		if self.in_bounds(w_cell):
+			adj_cells.append(w_cell)
+
 		# Loop untill point not on board is found		
 		while new_point in self.board_points:
-			x_diff = random.randint(-1,1)
-			y_diff = random.randint(-1,1)
-			new_point = (prev_x + x_diff, prev_y + y_diff)
+			new_point = adj_cells[random.randint(0,len(adj_cells) - 1)]
 
 		return new_point
 
@@ -80,7 +97,12 @@ class Puzzle(object):
 
 
 	def gen_puzzle(self):
-		pass
+		cells_seen = {}
+		cells_queue = []
+		cur_cell = self.start_cell
+
+		while not self.is_goal(cur_cell):
+			pass
 		
 
 
