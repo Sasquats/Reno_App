@@ -86,6 +86,7 @@ class Puzzle(object):
 		self.add_cell(start_point)
 		old_point = start_point
 
+		# Loop through max map size 
 		for pnts_lft in range(1, self.b_size):
 			new_point = self.gen_next_point(old_point)
 			self.add_cell(new_point)
@@ -99,12 +100,27 @@ class Puzzle(object):
 	def gen_puzzle(self):
 		cells_seen = {}
 		cells_queue = []
-		cur_cell = self.start_cell
+		new_cell = self.start_cell
 
-		while not self.is_goal(cur_cell):
-			pass
-		
+		# Loop untill end cell is found
+		while True:
+			cur_cell = new_cell
+			adj_cells = cur_cell.get_nbrs()
+			
+			for cell in adj_cells:
+				if cell not in cells_queue:
+					cells_queue.append(cell)
+				if cell not in cells_seen.keys():
+					cells_seen[cur_cell] = [cell]
+				else:
+					cells_seen[cur_cell] = cells_seen[cur_cell].append(cell)
 
+	
+	def is_goal(self, cell):
+		if cell is self.end_cell:
+			return True
+		else:
+			return False
 
 class Cell(object):
 	def __init__(self, board_pos, value=None, avail_vals=None):
@@ -112,4 +128,7 @@ class Cell(object):
 		self.board_pos = board_pos
 		self.avail_vals = avail_vals
 		self.nbrs = []
+
+	def get_nbrs(self):
+		return self.nbrs
 
