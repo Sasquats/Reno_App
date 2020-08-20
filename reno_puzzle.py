@@ -43,10 +43,15 @@ class Puzzle(object):
 		prev_x = prev_point[0]
 		prev_y = prev_point[1]
 
-		n_cell = (prev_x + 1, prev_y)
-		s_cell = (prev_x - 1, prev_y)
-		e_cell = (prev_x, prev_y + 1)
-		w_cell = (prev_x, prev_y - 1)
+		n_cell = (prev_x, prev_y + 1)
+		ne_cell = (prev_x + 1, prev_y + 1)
+		e_cell = (prev_x + 1, prev_y)
+		se_cell = (prev_x + 1, prev_y - 1)
+		s_cell = (prev_x, prev_y - 1)
+		sw_cell = (prev_x - 1, prev_y - 1)
+		w_cell = (prev_x - 1, prev_y)
+		
+		# Check cells for n,s,e,w
 		if self.in_bounds(n_cell):
 			adj_cells.append(n_cell)
 		if self.in_bounds(s_cell):
@@ -55,6 +60,16 @@ class Puzzle(object):
 			adj_cells.append(e_cell)
 		if self.in_bounds(w_cell):
 			adj_cells.append(w_cell)
+
+		# Check cells for ne, nw, se, sw
+		if self.in_bounds(ne_cell):
+			adj_cells.append(ne_cell)
+		if self.in_bounds(se_cell):
+			adj_cells.append(se_cell)
+		if self.in_bounds(nw_cell):
+			adj_cells.append(nw_cell)
+		if self.in_bounds(sw_cell):
+			adj_cells.append(sw_cell)
 
 		# Loop untill point not on board is found		
 		while new_point in self.board_points:
@@ -67,9 +82,13 @@ class Puzzle(object):
 			cur_x = cell.board_pos[0]
 			cur_y = cell.board_pos[1]
 			n_nbr = (cur_x, cur_y + 1)
-			s_nbr = (cur_x, cur_y - 1)
+			ne_nbr = (cur_x + 1, cur_y + 1)
 			e_nbr = (cur_x + 1, cur_y)
+			se_nbr = (cur_x + 1, cur_y - 1)
+			s_nbr = (cur_x, cur_y - 1)
+			sw_nbr = (cur_x - 1, cur_y - 1)
 			w_nbr = (cur_x - 1, cur_y)
+			nw_nbr = (cur_x - 1, cur_y + 1)
 
 			if n_nbr in self.board_points:
 				cell.nbrs.append(n_nbr)
@@ -79,6 +98,15 @@ class Puzzle(object):
 				cell.nbrs.append(e_nbr)
 			if w_nbr in self.board_points:
 				cell.nbrs.append(w_nbr)
+
+			if ne_nbr in self.board_points:
+				cell.nbrs.append(ne_nbr)
+			if se_nbr in self.board_points:
+				cell.nbrs.append(se_nbr)
+			if nw_nbr in self.board_points:
+				cell.nbrs.append(nw_nbr)
+			if sw_nbr in self.board_points:
+				cell.nbrs.append(sw_nbr)
 
 	
 	def gen_map(self):
@@ -98,16 +126,18 @@ class Puzzle(object):
 
 
 	def gen_puzzle(self):
-		cells_seen = {}
-		cells_queue = []
-		new_cell = self.start_cell
+		cells_visited = {}
+		cells_stack = []
+		cells_queue.append(self.start_cell)
 
 		# Loop untill end cell is found
 		while True:
-			cur_cell = new_cell
+			cur_cell = cells_queue.pop(0)
 			adj_cells = cur_cell.get_nbrs()
 			
 			for cell in adj_cells:
+				if self.is_goal(cell):
+					return
 				if cell not in cells_queue:
 					cells_queue.append(cell)
 				if cell not in cells_seen.keys():
@@ -115,8 +145,10 @@ class Puzzle(object):
 				else:
 					cells_seen[cur_cell] = cells_seen[cur_cell].append(cell)
 
+
 	
 	def is_goal(self, cell):
+		
 		if cell is self.end_cell:
 			return True
 		else:
