@@ -50,6 +50,7 @@ class Puzzle(object):
 		s_cell = (prev_x, prev_y - 1)
 		sw_cell = (prev_x - 1, prev_y - 1)
 		w_cell = (prev_x - 1, prev_y)
+		nw_cell = (prev_x - 1, prev_y + 1)
 		
 		# Check cells for n,s,e,w
 		if self.in_bounds(n_cell):
@@ -126,33 +127,22 @@ class Puzzle(object):
 
 
 	def gen_puzzle(self):
-		cells_visited = {}
-		cells_stack = []
-		cells_queue.append(self.start_cell)
-
-		# Loop untill end cell is found
-		while True:
-			cur_cell = cells_queue.pop(0)
-			adj_cells = cur_cell.get_nbrs()
-			
-			for cell in adj_cells:
-				if self.is_goal(cell):
-					return
-				if cell not in cells_queue:
-					cells_queue.append(cell)
-				if cell not in cells_seen.keys():
-					cells_seen[cur_cell] = [cell]
-				else:
-					cells_seen[cur_cell] = cells_seen[cur_cell].append(cell)
-
-
-	
-	def is_goal(self, cell):
+		cur_sol = []
+		solutions = []
+		self.bk_trk(self.start_cell.board_pos, explored, solutions)
 		
-		if cell is self.end_cell:
-			return True
-		else:
+				
+	def bk_trk(self, c, cur_sol, solutions):
+		cur_sol.appned(c)
+		if not self.is_solution(c):
 			return False
+		if self.is_solution(c):
+			solutions.append(cur_sol)
+		for nbr in c.get_nbrs():
+			bk_trk(nbr, explored)
+	
+	def is_solution(self, cell):
+		
 
 class Cell(object):
 	def __init__(self, board_pos, value=None, avail_vals=None):
