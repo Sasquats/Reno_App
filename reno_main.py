@@ -13,9 +13,9 @@ from reno_puzzle import Puzzle
 
 class RenoGame(Widget):
 	def __init__(self):
-		self.puzzle = Puzzle(size=30)
+		self.puzzle = Puzzle(size=3)
 		self.puzzle.gen_map()
-		self.puzzle.gen_puzzle()
+		self.puzzle.reslv_pzl()
 
 class RenoStart(App):
 	def __init__(self):

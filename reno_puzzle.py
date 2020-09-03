@@ -10,7 +10,7 @@ class Puzzle(object):
 		self.b_size = size
 		self.hint_num = hint_num
 		self.board_cells = []
-		self.board_points = []
+		self.board_points = {}
 		self.start_cell = None
 		self.end_cell = None
 
@@ -19,19 +19,20 @@ class Puzzle(object):
 			return False
 		return True
 
-	def add_cell(self, position):
+	def add_cell(self, position, num):
 		"""
 		Take a position tuple and create a new cell object with that point
 		"""
 		logger.write(f'Adding new point -> {position}')
 		new_cell = Cell(position)
+		new_cell.value = num
 		if not self.board_cells:
 			logger.write(f'Starting point -> {new_cell.board_pos}')
 			self.start_cell = new_cell
 		elif len(self.board_cells) is self.b_size - 1:
 			logger.write(f'End point -> {new_cell.board_pos}')
 			self.end_cell = new_cell
-		self.board_points.append(position)
+		self.board_points[position] = new_cell 
 		self.board_cells.append(new_cell)
 
 	def gen_next_point(self, prev_point):
@@ -91,34 +92,34 @@ class Puzzle(object):
 			w_nbr = (cur_x - 1, cur_y)
 			nw_nbr = (cur_x - 1, cur_y + 1)
 
-			if n_nbr in self.board_points:
-				cell.nbrs.append(n_nbr)
-			if s_nbr in self.board_points:
-				cell.nbrs.append(s_nbr)
-			if e_nbr in self.board_points:
-				cell.nbrs.append(e_nbr)
-			if w_nbr in self.board_points:
-				cell.nbrs.append(w_nbr)
+			if n_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[n_nbr])
+			if s_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[s_nbr])
+			if e_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[e_nbr])
+			if w_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[w_nbr])
 
-			if ne_nbr in self.board_points:
-				cell.nbrs.append(ne_nbr)
-			if se_nbr in self.board_points:
-				cell.nbrs.append(se_nbr)
-			if nw_nbr in self.board_points:
-				cell.nbrs.append(nw_nbr)
-			if sw_nbr in self.board_points:
-				cell.nbrs.append(sw_nbr)
+			if ne_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[ne_nbr])
+			if se_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[se_nbr])
+			if nw_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[nw_nbr])
+			if sw_nbr in self.board_points.keys():
+				cell.nbrs.append(self.board_points[sw_nbr])
 
 	
 	def gen_map(self):
 		start_point = (random.randint(1,self.b_size), random.randint(1, self.b_size))
-		self.add_cell(start_point)
+		self.add_cell(start_point, 1)
 		old_point = start_point
 
 		# Loop through max map size 
 		for pnts_lft in range(1, self.b_size):
 			new_point = self.gen_next_point(old_point)
-			self.add_cell(new_point)
+			self.add_cell(new_point, pnts_lft + 1)
 			old_point = new_point
 		logger.write(f'Total map size -> {len(self.board_cells)}')
 		logger.write('Finding neighbors...')
@@ -126,23 +127,41 @@ class Puzzle(object):
 		logger.write('Neighbors found')
 
 
-	def gen_puzzle(self):
+	def reslv_pzl(self):
+		"""
+		Attempts to resolve the current puzzle.
+		"""
 		cur_sol = []
 		solutions = []
-		self.bk_trk(self.start_cell.board_pos, explored, solutions)
-		
-				
-	def bk_trk(self, c, cur_sol, solutions):
-		cur_sol.appned(c)
-		if not self.is_solution(c):
-			return False
+		explored = []
+		logger.write('Finding solutions...')
+		self.bk_trk(self.start_cell, cur_sol, solutions, explored)
+		if solutions:
+			logger.write('Solutions found!')
+			sol_str = '\n'.join([sol for sol in solutions])
+			logger.write(sol_str)
+		else:
+			logger.write('No solutions found')
+
+	def bk_trk(self, c, cur_sol, solutions, explored):
+		explored.append(c)
+		cur_sol.append(c)
+		# if not self.is_solution(c):
+			# return False
 		if self.is_solution(c):
 			solutions.append(cur_sol)
+
+		logger.write(f'Cell: {self.start_cell}')
+		logger.write(f'Neighbors: {c.get_nbrs()}')
 		for nbr in c.get_nbrs():
-			bk_trk(nbr, explored)
+			self.bk_trk(nbr, cur_sol, solutions, explored)
 	
 	def is_solution(self, cell):
-		
+		logger.write(f'Cell {cell} <---> End Cell {self.end_cell.board_pos}')
+		if cell is self.end_cell.board_pos:
+			return True
+		else:
+			return False
 
 class Cell(object):
 	def __init__(self, board_pos, value=None, avail_vals=None):
