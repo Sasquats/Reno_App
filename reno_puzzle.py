@@ -138,27 +138,41 @@ class Puzzle(object):
 		self.bk_trk(self.start_cell, cur_sol, solutions, explored)
 		if solutions:
 			logger.write('Solutions found!')
-			sol_str = '\n'.join([sol for sol in solutions])
-			logger.write(sol_str)
+			for solution in solutions:
+				logger.write([cell.value for cell in solution])
+				logger.write([cell.board_pos for cell in solution])
 		else:
 			logger.write('No solutions found')
+			logger.write(f'Last solution {[cell.value for cell in cur_sol]}')
 
 	def bk_trk(self, c, cur_sol, solutions, explored):
 		explored.append(c)
-		cur_sol.append(c)
-		# if not self.is_solution(c):
-			# return False
+
+		if not cur_sol:
+			cur_sol.append(c)
+		elif self.valid_move(c, cur_sol[-1]):
+			cur_sol.append(c)
+		else:
+			return
+
 		if self.is_solution(c):
 			solutions.append(cur_sol)
 
-		logger.write(f'Cell: {self.start_cell}')
-		logger.write(f'Neighbors: {c.get_nbrs()}')
+		# logger.write(f'Cell: {self.start_cell}')
+		# logger.write(f'Neighbors: {c.get_nbrs()}')
 		for nbr in c.get_nbrs():
-			self.bk_trk(nbr, cur_sol, solutions, explored)
+			if nbr not in explored:
+				self.bk_trk(nbr, cur_sol, solutions, explored)
 	
 	def is_solution(self, cell):
-		logger.write(f'Cell {cell} <---> End Cell {self.end_cell.board_pos}')
-		if cell is self.end_cell.board_pos:
+		logger.write(f'Cell {cell.value} <---> End Cell {self.end_cell.value}')
+		if cell.value is self.end_cell.value:
+			return True
+		else:
+			return False
+
+	def valid_move(self, cell, lst_vld_mv):
+		if cell.value == (lst_vld_mv.value + 1):
 			return True
 		else:
 			return False
