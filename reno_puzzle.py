@@ -146,36 +146,40 @@ class Puzzle(object):
 			logger.write(f'Last solution {[cell.value for cell in cur_sol]}')
 
 	def bk_trk(self, c, cur_sol, solutions, explored):
-		explored.append(c)
-
 		if not cur_sol:
 			cur_sol.append(c)
+			explored.append(c)
 		elif self.valid_move(c, cur_sol[-1]):
 			cur_sol.append(c)
+			explored.append(c)
 		else:
 			return
 
-		if self.is_solution(c):
+		if self.is_solution(c, True):
 			solutions.append(cur_sol)
 
-		# logger.write(f'Cell: {self.start_cell}')
 		# logger.write(f'Neighbors: {c.get_nbrs()}')
 		for nbr in c.get_nbrs():
 			if nbr not in explored:
 				self.bk_trk(nbr, cur_sol, solutions, explored)
 	
-	def is_solution(self, cell):
-		logger.write(f'Cell {cell.value} <---> End Cell {self.end_cell.value}')
-		if cell.value is self.end_cell.value:
+	def is_solution(self, cell, solution=False):
+		if solution:
+			if cell.board_pos is self.end_cell.board_pos:
+				return True
+		elif cell.value is self.end_cell.value:
 			return True
-		else:
-			return False
+		return False
 
 	def valid_move(self, cell, lst_vld_mv):
 		if cell.value == (lst_vld_mv.value + 1):
 			return True
 		else:
 			return False
+
+	def print_board_vals(self):
+		for cell in self.board_cells:
+			logger.write(f'Cell: {cell.board_pos}, Value: {cell.value}')
 
 class Cell(object):
 	def __init__(self, board_pos, value=None, avail_vals=None):
