@@ -138,7 +138,9 @@ class Puzzle(object):
 		self.bk_trk(self.start_cell, cur_sol, solutions, explored)
 		if solutions:
 			logger.write('Solutions found!')
+			count = 1
 			for solution in solutions:
+				logger.write(f'Solution {str(count)}')
 				logger.write([cell.value for cell in solution])
 				logger.write([cell.board_pos for cell in solution])
 		else:
@@ -149,13 +151,14 @@ class Puzzle(object):
 		if not cur_sol:
 			cur_sol.append(c)
 			explored.append(c)
-		elif self.valid_move(c, cur_sol[-1]):
+		# Solution = true to skip valid move check 
+		elif self.valid_move(c, cur_sol[-1], solution=True):
 			cur_sol.append(c)
 			explored.append(c)
 		else:
 			return
-
-		if self.is_solution(c, True):
+		# Solution = true to find next board pos
+		if self.is_solution(c, solution=True):
 			solutions.append(cur_sol)
 
 		# logger.write(f'Neighbors: {c.get_nbrs()}')
@@ -171,8 +174,10 @@ class Puzzle(object):
 			return True
 		return False
 
-	def valid_move(self, cell, lst_vld_mv):
-		if cell.value == (lst_vld_mv.value + 1):
+	def valid_move(self, cell, lst_vld_mv, solution=False):
+		if solution:
+			return True
+		elif cell.value == (lst_vld_mv.value + 1):
 			return True
 		else:
 			return False
