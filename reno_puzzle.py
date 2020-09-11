@@ -135,49 +135,55 @@ class Puzzle(object):
 		solutions = []
 		explored = []
 		logger.write('Finding solutions...')
-		self.bk_trk(self.start_cell, cur_sol, solutions, explored)
+		start = self.start_cell
+		for nbr in start.get_nbrs():
+			self.bk_trk(nbr, [start], solutions, [start])
 		if solutions:
-			logger.write('Solutions found!')
 			count = 1
 			for solution in solutions:
 				logger.write(f'Solution {str(count)}')
 				logger.write([cell.value for cell in solution])
 				logger.write([cell.board_pos for cell in solution])
+				count += 1
 		else:
 			logger.write('No solutions found')
 			logger.write(f'Last solution {[cell.value for cell in cur_sol]}')
 
 	def bk_trk(self, c, cur_sol, solutions, explored):
-		if not cur_sol:
+		logger.write(f'Current cell: {c.board_pos}')
+		
+		# Solution = true to find next board pos
+		if self.is_solution(c, solution=True, cur_sol=cur_sol):
+			logger.write('Solution found!')
 			cur_sol.append(c)
-			explored.append(c)
+			solutions.append(cur_sol)
+			return
 		# Solution = true to skip valid move check 
-		elif self.valid_move(c, cur_sol[-1], solution=True):
+		elif self.valid_move(c, cur_sol, solution=True):
 			cur_sol.append(c)
 			explored.append(c)
 		else:
 			return
-		# Solution = true to find next board pos
-		if self.is_solution(c, solution=True):
-			solutions.append(cur_sol)
 
-		# logger.write(f'Neighbors: {c.get_nbrs()}')
+		logger.write(f'Neighbors: {[n.board_pos for n in c.get_nbrs()]}')
 		for nbr in c.get_nbrs():
-			if nbr not in explored:
-				self.bk_trk(nbr, cur_sol, solutions, explored)
+			# if nbr not in explored:
+			self.bk_trk(nbr, cur_sol.copy(), solutions, explored.copy())
 	
-	def is_solution(self, cell, solution=False):
+	def is_solution(self, cell, solution=False, cur_sol=None):
+		logger.write(f'Len of solution: {len(cur_sol)}')
 		if solution:
-			if cell.board_pos is self.end_cell.board_pos:
+			if cell.board_pos is self.end_cell.board_pos and len(cur_sol) == self.b_size - 1:
 				return True
 		elif cell.value is self.end_cell.value:
 			return True
 		return False
 
-	def valid_move(self, cell, lst_vld_mv, solution=False):
+	def valid_move(self, cell, cur_sol, solution=False):
 		if solution:
-			return True
-		elif cell.value == (lst_vld_mv.value + 1):
+			if cell not in cur_sol and len(cur_sol) <= self.b_size - 1:
+				return True
+		elif cur_sol[-1].value == (cur_sol[-1].value + 1):
 			return True
 		else:
 			return False
