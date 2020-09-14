@@ -181,7 +181,7 @@ class Puzzle(object):
 
 	def valid_move(self, cell, cur_sol, solution=False):
 		if solution:
-			if cell not in cur_sol and len(cur_sol) <= self.b_size - 1:
+			if cell not in cur_sol and len(cur_sol) <= self.b_size - 1 and cell != self.end_cell:
 				return True
 		elif cur_sol[-1].value == (cur_sol[-1].value + 1):
 			return True

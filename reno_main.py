@@ -13,7 +13,7 @@ from reno_puzzle import Puzzle
 
 class RenoGame(Widget):
 	def __init__(self):
-		self.puzzle = Puzzle(size=10)
+		self.puzzle = Puzzle(size=15)
 		self.puzzle.gen_map()
 		self.puzzle.reslv_pzl()
 
