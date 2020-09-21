@@ -6,13 +6,14 @@ from reno_log_err import logger
 import random
 
 class Puzzle(object):
-	def __init__(self, size=None, hint_num=None):
+	def __init__(self, size=None, hint_num=None, sol_pool=False):
 		self.b_size = size
 		self.hint_num = hint_num
 		self.board_cells = []
 		self.board_points = {}
 		self.start_cell = None
 		self.end_cell = None
+		self.sol_pool = sol_pool
 
 	def in_bounds(self, coords):
 		if coords[0] < 0 or coords[1] < 0 or coords[0] > self.b_size or coords[1] > self.b_size:
@@ -75,6 +76,7 @@ class Puzzle(object):
 
 		# Loop untill point not on board is found		
 		while new_point in self.board_points:
+			logger.write("Searching for new point...")
 			new_point = adj_cells[random.randint(0,len(adj_cells) - 1)]
 
 		return new_point
@@ -145,12 +147,17 @@ class Puzzle(object):
 				logger.write([cell.value for cell in solution])
 				logger.write([cell.board_pos for cell in solution])
 				count += 1
+		elif len(solutions) > 2:
+			logger.write('Too many solutions!')
 		else:
 			logger.write('No solutions found')
 			logger.write(f'Last solution {[cell.value for cell in cur_sol]}')
 
 	def bk_trk(self, c, cur_sol, solutions, explored):
-		logger.write(f'Current cell: {c.board_pos}')
+		#logger.write(f'Current cell: {c.board_pos}')
+		# Too many solutions check
+		if len(solutions) >= 3 and not self.sol_pool:
+			return
 		
 		# Solution = true to find next board pos
 		if self.is_solution(c, solution=True, cur_sol=cur_sol):
@@ -171,7 +178,6 @@ class Puzzle(object):
 			self.bk_trk(nbr, cur_sol.copy(), solutions, explored.copy())
 	
 	def is_solution(self, cell, solution=False, cur_sol=None):
-		logger.write(f'Len of solution: {len(cur_sol)}')
 		if solution:
 			if cell.board_pos is self.end_cell.board_pos and len(cur_sol) == self.b_size - 1:
 				return True
