@@ -76,8 +76,11 @@ class Puzzle(object):
 
 		# Loop untill point not on board is found		
 		while new_point in self.board_points:
+			if not adj_cells:
+				raise ValueError('Ran out of cells.')
 			logger.write("Searching for new point...")
 			new_point = adj_cells[random.randint(0,len(adj_cells) - 1)]
+			adj_cells.remove(new_point)
 
 		return new_point
 
@@ -140,15 +143,16 @@ class Puzzle(object):
 		start = self.start_cell
 		for nbr in start.get_nbrs():
 			self.bk_trk(nbr, [start], solutions, [start])
-		if solutions:
+		
+		if (len(solutions) > 2) and not self.sol_pool:
+			logger.write('Too many solutions!')
+		elif solutions:
 			count = 1
 			for solution in solutions:
 				logger.write(f'Solution {str(count)}')
 				logger.write([cell.value for cell in solution])
 				logger.write([cell.board_pos for cell in solution])
 				count += 1
-		elif len(solutions) > 2:
-			logger.write('Too many solutions!')
 		else:
 			logger.write('No solutions found')
 			logger.write(f'Last solution {[cell.value for cell in cur_sol]}')
@@ -172,7 +176,7 @@ class Puzzle(object):
 		else:
 			return
 
-		logger.write(f'Neighbors: {[n.board_pos for n in c.get_nbrs()]}')
+		# logger.write(f'Neighbors: {[n.board_pos for n in c.get_nbrs()]}')
 		for nbr in c.get_nbrs():
 			# if nbr not in explored:
 			self.bk_trk(nbr, cur_sol.copy(), solutions, explored.copy())
