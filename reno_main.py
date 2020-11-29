@@ -10,12 +10,14 @@ from kivy.properties import (
 from kivy.vector import Vector
 from kivy.clock import Clock
 from reno_puzzle import Puzzle
+from reno_log_err import logger
 
 class RenoGame(Widget):
 	def __init__(self):
-		self.puzzle = Puzzle(size=30, sol_pool=True)
+		self.puzzle = Puzzle(size=10, sol_pool=True)
 		self.puzzle.gen_map()
 		self.puzzle.reslv_pzl()
+		logger.write([self.puzzle.fix_pnts[k].value for k in self.puzzle.fix_pnts])
 
 class RenoStart(App):
 	def __init__(self):

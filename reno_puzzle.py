@@ -5,10 +5,21 @@
 from reno_log_err import logger
 import random
 
+class Cell(object):
+	def __init__(self, board_pos, value=None, avail_vals=None):
+		self.value = value
+		self.board_pos = board_pos
+		self.avail_vals = avail_vals
+		self.nbrs = []
+
+	def get_nbrs(self):
+		return self.nbrs
+
+
 class Puzzle(object):
-	def __init__(self, size=None, hint_num=None, sol_pool=False):
+	def __init__(self, size=None, sol_pool=False):
 		self.b_size = size
-		self.hint_num = hint_num
+		self.fix_pnts = {}
 		self.board_cells = []
 		self.board_points = {}
 		self.start_cell = None
@@ -153,6 +164,8 @@ class Puzzle(object):
 				logger.write([cell.value for cell in solution])
 				logger.write([cell.board_pos for cell in solution])
 				count += 1
+			# Take solutions and find enforced points
+			self.fix_pnts = self.rslv_fix_pnts(solutions)
 		else:
 			logger.write('No solutions found')
 			logger.write(f'Last solution {[cell.value for cell in cur_sol]}')
@@ -168,7 +181,7 @@ class Puzzle(object):
 			logger.write('Solution found!')
 			cur_sol.append(c)
 			solutions.append(cur_sol)
-			return
+			return solutions
 		# Solution = true to skip valid move check 
 		elif self.valid_move(c, cur_sol, solution=True):
 			cur_sol.append(c)
@@ -202,13 +215,20 @@ class Puzzle(object):
 		for cell in self.board_cells:
 			logger.write(f'Cell: {cell.board_pos}, Value: {cell.value}')
 
-class Cell(object):
-	def __init__(self, board_pos, value=None, avail_vals=None):
-		self.value = value
-		self.board_pos = board_pos
-		self.avail_vals = avail_vals
-		self.nbrs = []
-
-	def get_nbrs(self):
-		return self.nbrs
+	def rslv_fix_pnts(self, solutions):
+		key_pnts = {}
+		pnts_map = {}
+		for sol in solutions:
+			path_idx = 0
+			for c in sol:
+				if path_idx not in pnts_map.keys():
+					pnts_map[path_idx] = {c: 1}
+				elif c not in pnts_map[path_idx].keys():
+					pnts_map[path_idx] = {c: 1}
+				else:
+					pnts_map[path_idx][c] += 1
+			for idx in pnts_map[path_idx].keys():
+				if pnts_map[path_idx][idx] == 1:
+					key_pnts[path_idx] = idx
+		return key_pnts
 
